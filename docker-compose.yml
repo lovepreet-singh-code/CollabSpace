@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  mongo:
+    image: mongo:6
+    container_name: collab_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+  redis:
+    image: redis:7
+    container_name: collab_redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server","--save","900","1"]
+volumes:
+  mongo-data:
