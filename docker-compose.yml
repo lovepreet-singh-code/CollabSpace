@@ -15,3 +15,19 @@ services:
     command: ["redis-server","--save","900","1"]
 volumes:
   mongo-data:
+
+document-service:
+  build:
+    context: ./services/document-service
+    dockerfile: Dockerfile
+  container_name: collab_document
+  environment:
+    - PORT=4002
+    - MONGO_URI=mongodb://mongo:27017/collabspace_documents
+    - JWT_SECRET=${JWT_SECRET}
+    - SHARE_TOKEN_SECRET=${SHARE_TOKEN_SECRET}
+    - USER_SERVICE_URL=http://user-service:4001
+  ports:
+    - "4002:4002"
+  depends_on:
+    - mongo
