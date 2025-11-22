@@ -31,3 +31,20 @@ document-service:
     - "4002:4002"
   depends_on:
     - mongo
+
+collaboration-service:
+  build:
+    context: ./services/collaboration-service
+    dockerfile: Dockerfile
+  container_name: collab_collab
+  environment:
+    - PORT=4003
+    - MONGO_URI=mongodb://mongo:27017/collabspace_collab
+    - REDIS_URL=redis://redis:6379
+    - KAFKA_BROKERS=kafka:9092
+  ports:
+    - "4003:4003"
+  depends_on:
+    - mongo
+    - redis
+    # - kafka (if you add it)

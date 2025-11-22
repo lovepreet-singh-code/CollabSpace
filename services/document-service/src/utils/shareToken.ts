@@ -10,3 +10,4 @@ export function createShareToken(docId: string, role: "viewer" | "editor") {
 export function verifyShareToken(token: string): { docId: string; role: string } {
   return jwt.verify(token, config.shareTokenSecret) as any;
 }
+
