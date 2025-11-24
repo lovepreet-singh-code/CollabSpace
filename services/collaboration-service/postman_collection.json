@@ -2,47 +2,82 @@
     "info": {
         "_postman_id": "collab-service-id",
         "name": "CollabSpace Collaboration Service",
+        "description": "Collection for testing the Collaboration Service. Includes HTTP endpoints for health monitoring and WebSocket connections for real-time document collaboration via Yjs.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
         {
-            "name": "Health Check",
-            "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                    "raw": "http://localhost:4003/health",
-                    "protocol": "http",
-                    "host": [
-                        "localhost"
-                    ],
-                    "port": "4003",
-                    "path": [
-                        "health"
-                    ]
+            "name": "HTTP",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:4003/health",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "4003",
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Returns the service status. Useful for monitoring uptime."
+                    },
+                    "response": []
                 }
-            },
-            "response": []
+            ],
+            "description": "Standard HTTP endpoints."
         },
         {
-            "name": "Connect to Document (WebSocket)",
-            "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                    "raw": "ws://localhost:4003/test-doc",
-                    "protocol": "ws",
-                    "host": [
-                        "localhost"
-                    ],
-                    "port": "4003",
-                    "path": [
-                        "test-doc"
-                    ]
-                },
-                "description": "Connects to a Yjs document via WebSocket. The document name is the path."
-            },
-            "response": []
+            "name": "WebSocket (Yjs)",
+            "item": [
+                {
+                    "name": "Connect to Document",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Upgrade",
+                                "value": "websocket",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Connection",
+                                "value": "Upgrade",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Sec-WebSocket-Version",
+                                "value": "13",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Sec-WebSocket-Key",
+                                "value": "dGhlIHNhbXBsZSBub25jZQ==",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "http://localhost:4003/test-document",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "4003",
+                            "path": [
+                                "test-document"
+                            ]
+                        },
+                        "description": "Handshake request for WebSocket. Note: Postman's standard HTTP client cannot maintain a WebSocket connection. To test real-time sync, use Postman's 'New > WebSocket Request' feature or the provided HTML test client."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Real-time collaboration endpoints using the Yjs protocol."
         }
     ]
 }

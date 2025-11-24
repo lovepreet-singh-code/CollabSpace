@@ -65,3 +65,44 @@ const initializeDoc = async (docName: string, doc: Y.Doc) => {
         }, SAVE_DEBOUNCE_MS));
     });
 };
+
+export const getDocumentState = async (docName: string): Promise<Buffer | null> => {
+    const doc = docs.get(docName);
+    if (doc) {
+        return Buffer.from(Y.encodeStateAsUpdate(doc));
+    }
+    // Try loading from DB if not in memory
+    const state = await loadState(docName);
+    return state ? Buffer.from(state) : null;
+};
+
+export const restoreDocumentState = async (docName: string, state: Buffer) => {
+    // 1. Stop any pending save
+    if (saveTimers.has(docName)) {
+        clearTimeout(saveTimers.get(docName)!);
+        saveTimers.delete(docName);
+    }
+
+    // 2. Save to DB (Source of Truth)
+    await saveState(docName, new Uint8Array(state));
+
+    // 3. Handle in-memory doc
+    const doc = docs.get(docName);
+    if (doc) {
+        // Close all connections to force reconnect/reload
+        // @ts-ignore - accessing internal property
+        if (doc.conns) {
+            // @ts-ignore
+            for (const conn of doc.conns.keys()) {
+                try {
+                    conn.close(1012, "Document restored");
+                } catch (e) {
+                    console.error("Error closing connection", e);
+                }
+            }
+        }
+        // Remove from memory so next connection loads from DB
+        docs.delete(docName);
+        doc.destroy();
+    }
+};

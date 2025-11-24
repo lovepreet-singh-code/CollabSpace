@@ -1,0 +1,87 @@
+{
+    "info": {
+        "_postman_id": "version-service-collection",
+        "name": "Version Service",
+        "description": "Collection for testing Version Service APIs",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/health",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "health"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get Versions for Document",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/versions/:docName",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "versions",
+                        ":docName"
+                    ],
+                    "variable": [
+                        {
+                            "key": "docName",
+                            "value": "default-doc",
+                            "description": "Name of the document"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Restore Version",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                    "raw": "{{baseUrl}}/api/versions/restore/:versionId",
+                    "host": [
+                        "{{baseUrl}}"
+                    ],
+                    "path": [
+                        "api",
+                        "versions",
+                        "restore",
+                        ":versionId"
+                    ],
+                    "variable": [
+                        {
+                            "key": "versionId",
+                            "value": "",
+                            "description": "ID of the version to restore"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:4004",
+            "type": "string"
+        }
+    ]
+}

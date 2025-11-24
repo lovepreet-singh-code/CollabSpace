@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CollabSpace Test Client</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CollabSpace Test Client</h1>
+            <div class="connection-status">
+                Status: <span id="status" class="disconnected">Disconnected</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="controls">
+                <input type="text" id="docName" value="test-doc" placeholder="Document Name">
+                <button id="connectBtn">Connect</button>
+                <button id="disconnectBtn" disabled>Disconnect</button>
+            </div>
+
+            <div class="editor-container">
+                <textarea id="editor" placeholder="Type here to sync..." disabled></textarea>
+            </div>
+
+            <div class="awareness">
+                <h3>Active Users: <span id="userCount">0</span></h3>
+                <ul id="userList"></ul>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
