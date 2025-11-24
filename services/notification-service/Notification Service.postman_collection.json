@@ -1,0 +1,135 @@
+{
+    "info": {
+        "name": "Notification Service",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost:4005/health",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "4005",
+                    "path": [
+                        "health"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "List Notifications",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost:4005/api/notifications?userId=user123",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "4005",
+                    "path": [
+                        "api",
+                        "notifications"
+                    ],
+                    "query": [
+                        {
+                            "key": "userId",
+                            "value": "user123"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Mark Read",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"userId\": \"user123\",\n    \"ids\": [\"notification_id_here\"]\n}"
+                },
+                "url": {
+                    "raw": "http://localhost:4005/api/notifications/mark-read",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "4005",
+                    "path": [
+                        "api",
+                        "notifications",
+                        "mark-read"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Mark All Read",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"userId\": \"user123\"\n}"
+                },
+                "url": {
+                    "raw": "http://localhost:4005/api/notifications/mark-all-read",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "4005",
+                    "path": [
+                        "api",
+                        "notifications",
+                        "mark-all-read"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Delete Notification",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "http://localhost:4005/api/notifications/notification_id_here?userId=user123",
+                    "protocol": "http",
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "4005",
+                    "path": [
+                        "api",
+                        "notifications",
+                        "notification_id_here"
+                    ],
+                    "query": [
+                        {
+                            "key": "userId",
+                            "value": "user123"
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}
