@@ -1,10 +1,10 @@
 {
     "info": {
         "name": "CollabSpace Complete API",
-        "description": "Comprehensive API collection for CollabSpace microservices platform. Includes authentication, document management, real-time collaboration, comments, versions, and notifications.",
+        "description": "Comprehensive API collection for CollabSpace microservices platform with Nginx reverse proxy. Includes authentication, document management, real-time collaboration, comments, versions, and notifications. Default base URL: http://localhost (Nginx on port 80).",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         "_postman_id": "collabspace-complete-v1",
-        "version": "1.0.0"
+        "version": "2.0.0"
     },
     "auth": {
         "type": "bearer",
@@ -24,7 +24,7 @@
                 "exec": [
                     "// Auto-set authorization header for protected routes",
                     "if (pm.request.url.path.join('/').includes('api/') && !pm.request.url.path.join('/').includes('api/auth/register') && !pm.request.url.path.join('/').includes('api/auth/login')) {",
-                    "    const token = pm.environment.get('auth_token');",
+                    "    const token = pm.environment.get('auth_token') || pm.collectionVariables.get('auth_token');",
                     "    if (token) {",
                     "        pm.request.headers.add({",
                     "            key: 'Authorization',",
@@ -51,6 +51,7 @@
                                     "    const response = pm.response.json();",
                                     "    if (response.user && response.user._id) {",
                                     "        pm.environment.set('user_id', response.user._id);",
+                                    "                    pm.collectionVariables.set('user_id', response.user._id);",
                                     "    }",
                                     "    pm.test('User registered successfully', () => {",
                                     "        pm.expect(response).to.have.property('user');",
@@ -98,9 +99,11 @@
                                     "    const response = pm.response.json();",
                                     "    if (response.token) {",
                                     "        pm.environment.set('auth_token', response.token);",
+                                    "                    pm.collectionVariables.set('auth_token', response.token);",
                                     "    }",
                                     "    if (response.user && response.user._id) {",
                                     "        pm.environment.set('user_id', response.user._id);",
+                                    "                    pm.collectionVariables.set('user_id', response.user._id);",
                                     "    }",
                                     "    pm.test('Login successful', () => {",
                                     "        pm.expect(response).to.have.property('token');",
@@ -234,6 +237,7 @@
                                     "    const response = pm.response.json();",
                                     "    if (response._id) {",
                                     "        pm.environment.set('document_id', response._id);",
+                                    "                    pm.collectionVariables.set('document_id', response._id);",
                                     "    }",
                                     "    pm.test('Document created successfully', () => {",
                                     "        pm.expect(response).to.have.property('_id');",
@@ -457,6 +461,7 @@
                                     "    const response = pm.response.json();",
                                     "    if (response._id) {",
                                     "        pm.environment.set('comment_id', response._id);",
+                                    "                    pm.collectionVariables.set('comment_id', response._id);",
                                     "    }",
                                     "    pm.test('Comment created successfully', () => {",
                                     "        pm.expect(response).to.have.property('_id');",
@@ -620,6 +625,7 @@
                                     "    const response = pm.response.json();",
                                     "    if (Array.isArray(response) && response.length > 0 && response[0]._id) {",
                                     "        pm.environment.set('version_id', response[0]._id);",
+                                    "                    pm.collectionVariables.set('version_id', response[0]._id);",
                                     "    }",
                                     "    pm.test('Version history retrieved', () => {",
                                     "        pm.expect(response).to.be.an('array');",
@@ -789,6 +795,38 @@
                 }
             ],
             "description": "Real-time collaboration via WebSocket (Y.js)"
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost",
+            "type": "default"
+        },
+        {
+            "key": "auth_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "document_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "comment_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "version_id",
+            "value": "",
+            "type": "string"
         }
     ]
 }

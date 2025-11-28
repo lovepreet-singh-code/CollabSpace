@@ -1,6 +1,6 @@
 # CollabSpace API Testing Guide
 
-This guide explains how to use the Postman collection to test all CollabSpace services.
+This guide explains how to use the Postman collection to test all CollabSpace services through the Nginx reverse proxy.
 
 ## Quick Start
 
@@ -66,15 +66,17 @@ The JWT token is automatically saved to the environment and used for all subsequ
 
 The collection uses these variables (auto-populated by test scripts):
 
-| Variable | Description | Auto-Set |
-|----------|-------------|----------|
-| `base_url` | API Gateway URL | Manual |
-| `auth_token` | JWT authentication token | ✓ |
-| `user_id` | Current user ID | ✓ |
-| `document_id` | Last created document ID | ✓ |
-| `comment_id` | Last created comment ID | ✓ |
-| `version_id` | Last version ID | ✓ |
-| `collab_ws_url` | WebSocket URL for collaboration | Manual |
+| Variable | Description | Default Value | Auto-Set |
+|----------|-------------|---------------|----------|
+| `base_url` | Nginx reverse proxy URL | `http://localhost` | Manual |
+| `gateway_url` | Direct gateway URL (alternative) | `http://localhost:8000` | Manual |
+| `ws_url` | WebSocket URL via Nginx | `ws://localhost/ws` | Manual |
+| `ws_direct_url` | Direct WebSocket URL | `ws://localhost:4003` | Manual |
+| `auth_token` | JWT authentication token | - | ✓ |
+| `user_id` | Current user ID | - | ✓ |
+| `document_id` | Last created document ID | - | ✓ |
+| `comment_id` | Last created comment ID | - | ✓ |
+| `version_id` | Last version ID | - | ✓ |
 
 ## Collection Features
 
@@ -113,7 +115,8 @@ Each request includes test scripts that:
 
 ### 6. Collaboration (WebSocket)
 - Real-time editing via Y.js
-- Connection: `ws://localhost:4003/:docName`
+- Connection via Nginx: `ws://localhost/ws/:docName` (recommended)
+- Direct connection: `ws://localhost:4003/:docName` (alternative)
 
 ## Running Collection Tests
 
@@ -137,9 +140,11 @@ Each request includes test scripts that:
 - Verify services are running: `docker compose ps`
 
 ### Connection Refused
-- Verify gateway is running on port 8000
-- Check `base_url` in environment variables
-- Ensure all services are healthy
+- Verify nginx is running on port 80: `docker compose ps nginx`
+- Verify gateway is running on port 8000: `docker compose ps gateway-service`
+- Check `base_url` in environment variables (should be `http://localhost`)
+- Ensure all services are healthy: `docker compose ps`
+- Test nginx health: `curl http://localhost/nginx-health`
 
 ### Missing IDs
 - Run requests in order (Register → Login → Create Document)
@@ -150,16 +155,22 @@ Each request includes test scripts that:
 
 For real-time collaboration testing, use a WebSocket client:
 
+**Via Nginx (Recommended):**
 ```javascript
-const ws = new WebSocket('ws://localhost:4003/my-document');
+const ws = new WebSocket('ws://localhost/ws/my-document');
 
 ws.onopen = () => {
-  console.log('Connected to collaboration server');
+  console.log('Connected via Nginx!');
 };
 
 ws.onmessage = (event) => {
   console.log('Received update:', event.data);
 };
+```
+
+**Direct Connection (Alternative):**
+```javascript
+const ws = new WebSocket('ws://localhost:4003/my-document');
 ```
 
 Or use browser extensions like:
@@ -168,17 +179,18 @@ Or use browser extensions like:
 
 ## Service Ports
 
-| Service | Port | Direct Access |
-|---------|------|---------------|
-| Gateway | 8000 | ✓ (Recommended) |
-| User Service | 4001 | ✓ |
-| Document Service | 4002 | ✓ |
-| Collaboration Service | 4003 | ✓ (WebSocket) |
-| Version Service | 4004 | ✓ |
-| Notification Service | 4005 | ✓ |
-| Comment Service | 4006 | ✓ |
+| Service | Port | Access |
+|---------|------|--------|
+| **Nginx (Reverse Proxy)** | **80/443** | **✓ Recommended** |
+| Gateway | 8000 | ✓ Alternative |
+| User Service | 4001 | Debug only |
+| Document Service | 4002 | Debug only |
+| Collaboration Service | 4003 | Debug/WebSocket |
+| Version Service | 4004 | Debug only |
+| Notification Service | 4005 | Debug only |
+| Comment Service | 4006 | Debug only |
 
-**Note:** Use the Gateway (port 8000) for all API testing. Direct service access is available for debugging.
+**Note:** Use Nginx (port 80) for all API testing. It provides rate limiting, security headers, and load balancing. Direct service access is available for debugging.
 
 ## Next Steps
 
