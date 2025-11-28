@@ -1,9 +1,10 @@
 FROM node:18-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --only=production
+
+RUN npm install
 
 COPY . .
 
@@ -11,4 +12,4 @@ RUN npm run build
 
 EXPOSE 4002
 
-CMD ["node", "dist/index.js"]
+CMD ["npm", "start"]

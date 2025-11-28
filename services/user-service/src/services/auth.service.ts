@@ -39,3 +39,6 @@ export async function revokeRole(userId: string, docId: string) {
   await user.save();
   return user;
 }
+
+
+

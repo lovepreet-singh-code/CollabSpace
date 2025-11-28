@@ -1,0 +1,794 @@
+{
+    "info": {
+        "name": "CollabSpace Complete API",
+        "description": "Comprehensive API collection for CollabSpace microservices platform. Includes authentication, document management, real-time collaboration, comments, versions, and notifications.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_postman_id": "collabspace-complete-v1",
+        "version": "1.0.0"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{auth_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Auto-set authorization header for protected routes",
+                    "if (pm.request.url.path.join('/').includes('api/') && !pm.request.url.path.join('/').includes('api/auth/register') && !pm.request.url.path.join('/').includes('api/auth/login')) {",
+                    "    const token = pm.environment.get('auth_token');",
+                    "    if (token) {",
+                    "        pm.request.headers.add({",
+                    "            key: 'Authorization',",
+                    "            value: 'Bearer ' + token",
+                    "        });",
+                    "    }",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "item": [
+        {
+            "name": "1. Authentication",
+            "item": [
+                {
+                    "name": "Register User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.user && response.user._id) {",
+                                    "        pm.environment.set('user_id', response.user._id);",
+                                    "    }",
+                                    "    pm.test('User registered successfully', () => {",
+                                    "        pm.expect(response).to.have.property('user');",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"name\": \"Alice Johnson\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user account"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.token) {",
+                                    "        pm.environment.set('auth_token', response.token);",
+                                    "    }",
+                                    "    if (response.user && response.user._id) {",
+                                    "        pm.environment.set('user_id', response.user._id);",
+                                    "    }",
+                                    "    pm.test('Login successful', () => {",
+                                    "        pm.expect(response).to.have.property('token');",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login and receive JWT token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Current User",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Get current authenticated user profile"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Grant Role",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"role\": \"editor\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/role/grant",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "role",
+                                "grant"
+                            ]
+                        },
+                        "description": "Grant a role to a user (admin only)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Revoke Role",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"role\": \"editor\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/role/revoke",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "role",
+                                "revoke"
+                            ]
+                        },
+                        "description": "Revoke a role from a user (admin only)"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User authentication and authorization endpoints"
+        },
+        {
+            "name": "2. Documents",
+            "item": [
+                {
+                    "name": "Create Document",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response._id) {",
+                                    "        pm.environment.set('document_id', response._id);",
+                                    "    }",
+                                    "    pm.test('Document created successfully', () => {",
+                                    "        pm.expect(response).to.have.property('_id');",
+                                    "        pm.expect(response).to.have.property('title');",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Project Proposal\",\n  \"content\": \"This is the initial draft of our project proposal.\",\n  \"tags\": [\"proposal\", \"project\", \"draft\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/documents",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "documents"
+                            ]
+                        },
+                        "description": "Create a new document"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Documents",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/documents",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "documents"
+                            ]
+                        },
+                        "description": "Get all documents for the current user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Document",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/documents/{{document_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "documents",
+                                "{{document_id}}"
+                            ]
+                        },
+                        "description": "Get a specific document by ID"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Document",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Project Proposal - Updated\",\n  \"content\": \"This is the revised version of our project proposal with additional details.\",\n  \"tags\": [\"proposal\", \"project\", \"final\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/documents/{{document_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "documents",
+                                "{{document_id}}"
+                            ]
+                        },
+                        "description": "Update an existing document"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Document",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/documents/{{document_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "documents",
+                                "{{document_id}}"
+                            ]
+                        },
+                        "description": "Delete a document"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add Collaborator",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"userId\": \"USER_ID_HERE\",\n  \"role\": \"editor\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/documents/{{document_id}}/collaborators",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "documents",
+                                "{{document_id}}",
+                                "collaborators"
+                            ]
+                        },
+                        "description": "Add a collaborator to a document"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Remove Collaborator",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/documents/{{document_id}}/collaborators/USER_ID_HERE",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "documents",
+                                "{{document_id}}",
+                                "collaborators",
+                                "USER_ID_HERE"
+                            ]
+                        },
+                        "description": "Remove a collaborator from a document"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Generate Share Link",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"permission\": \"view\",\n  \"expiresIn\": \"7d\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/documents/{{document_id}}/share",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "documents",
+                                "{{document_id}}",
+                                "share"
+                            ]
+                        },
+                        "description": "Generate a shareable link for a document"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Document management endpoints"
+        },
+        {
+            "name": "3. Comments",
+            "item": [
+                {
+                    "name": "Create Comment Thread",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response._id) {",
+                                    "        pm.environment.set('comment_id', response._id);",
+                                    "    }",
+                                    "    pm.test('Comment created successfully', () => {",
+                                    "        pm.expect(response).to.have.property('_id');",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"docId\": \"{{document_id}}\",\n  \"content\": \"This section needs more detail about the implementation timeline.\",\n  \"position\": {\n    \"line\": 42,\n    \"column\": 10\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/comments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "comments"
+                            ]
+                        },
+                        "description": "Create a new comment thread on a document"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reply to Comment",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"threadId\": \"{{comment_id}}\",\n  \"content\": \"I agree, I'll add more details in the next revision.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/comments/reply",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "comments",
+                                "reply"
+                            ]
+                        },
+                        "description": "Reply to an existing comment thread"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Comments for Document",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/comments/{{document_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "comments",
+                                "{{document_id}}"
+                            ]
+                        },
+                        "description": "Get all comments for a specific document"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Comment",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/comments/{{comment_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "comments",
+                                "{{comment_id}}"
+                            ]
+                        },
+                        "description": "Delete a comment or reply"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Resolve Thread",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/comments/{{comment_id}}/resolve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "comments",
+                                "{{comment_id}}",
+                                "resolve"
+                            ]
+                        },
+                        "description": "Mark a comment thread as resolved"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Unresolve Thread",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/comments/{{comment_id}}/unresolve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "comments",
+                                "{{comment_id}}",
+                                "unresolve"
+                            ]
+                        },
+                        "description": "Reopen a resolved comment thread"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Comment and discussion thread endpoints"
+        },
+        {
+            "name": "4. Versions",
+            "item": [
+                {
+                    "name": "Get Version History",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (Array.isArray(response) && response.length > 0 && response[0]._id) {",
+                                    "        pm.environment.set('version_id', response[0]._id);",
+                                    "    }",
+                                    "    pm.test('Version history retrieved', () => {",
+                                    "        pm.expect(response).to.be.an('array');",
+                                    "    });",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/versions/{{document_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "versions",
+                                "{{document_id}}"
+                            ]
+                        },
+                        "description": "Get version history for a document"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Restore Version",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/versions/restore/{{version_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "versions",
+                                "restore",
+                                "{{version_id}}"
+                            ]
+                        },
+                        "description": "Restore a document to a previous version"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Document version control endpoints"
+        },
+        {
+            "name": "5. Notifications",
+            "item": [
+                {
+                    "name": "List Notifications",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications"
+                            ]
+                        },
+                        "description": "Get all notifications for the current user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Mark Notification as Read",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"notificationId\": \"NOTIFICATION_ID_HERE\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications/mark-read",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "mark-read"
+                            ]
+                        },
+                        "description": "Mark a specific notification as read"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Mark All as Read",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications/mark-all-read",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "mark-all-read"
+                            ]
+                        },
+                        "description": "Mark all notifications as read"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Notification",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications/NOTIFICATION_ID_HERE",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "NOTIFICATION_ID_HERE"
+                            ]
+                        },
+                        "description": "Delete a specific notification"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User notification management endpoints"
+        },
+        {
+            "name": "6. Collaboration (WebSocket)",
+            "item": [
+                {
+                    "name": "WebSocket Connection Info",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/collab",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "collab"
+                            ]
+                        },
+                        "description": "**Real-time Collaboration via WebSocket**\n\nThe collaboration service uses WebSocket for real-time document editing with Y.js CRDT.\n\n**Connection URL:**\n```\nws://localhost:4003/:docName\n```\n\n**Example:**\n```javascript\nconst ws = new WebSocket('ws://localhost:4003/my-document');\n\nws.onopen = () => {\n  console.log('Connected to collaboration server');\n};\n\nws.onmessage = (event) => {\n  // Handle Y.js sync messages\n  console.log('Received update:', event.data);\n};\n```\n\n**Features:**\n- Real-time collaborative editing\n- Conflict-free replicated data type (CRDT)\n- Automatic persistence to MongoDB\n- Redis pub/sub for multi-instance sync\n- Kafka events for document saves\n\n**Note:** This endpoint is for documentation only. Use a WebSocket client to test real-time collaboration."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Real-time collaboration via WebSocket (Y.js)"
+        }
+    ]
+}

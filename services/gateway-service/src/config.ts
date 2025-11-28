@@ -10,5 +10,6 @@ export default {
         collaboration: process.env.COLLAB_SERVICE_URL || "http://localhost:4003",
         version: process.env.VERSION_SERVICE_URL || "http://localhost:4004",
         notification: process.env.NOTIF_SERVICE_URL || "http://localhost:4005",
+        comment: process.env.COMMENT_SERVICE_URL || "http://localhost:4006",
     },
 };
