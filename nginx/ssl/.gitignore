@@ -1,0 +1,6 @@
+# Placeholder file to ensure ssl directory is created
+# Add your SSL certificates here
+*.crt
+*.key
+*.pem
+!README.md

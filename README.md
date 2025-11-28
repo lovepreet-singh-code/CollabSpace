@@ -15,9 +15,10 @@ A microservices-based collaborative document editing platform with real-time syn
 docker compose up --build -d
 ```
 
-This will start all 12 containers:
+This will start all 13 containers:
 - **Infrastructure**: MongoDB, Redis, Kafka, Zookeeper
 - **Services**: User, Document, Collaboration, Version, Notification, Comment, Gateway
+- **Reverse Proxy**: Nginx
 
 ### Verify Services
 
@@ -62,7 +63,8 @@ All services should show as "Up" and healthy.
 
 | Service | Port | Description |
 |---------|------|-------------|
-| **Gateway** | 8000 | API Gateway - single entry point |
+| **Nginx** | 80/443 | Reverse proxy - main entry point |
+| **Gateway** | 8000 | API Gateway - routes to microservices |
 | **User Service** | 4001 | Authentication & user management |
 | **Document Service** | 4002 | Document CRUD & sharing |
 | **Collaboration Service** | 4003 | Real-time editing (WebSocket/Y.js) |
@@ -79,7 +81,9 @@ All services should show as "Up" and healthy.
 
 ## 🔑 API Endpoints
 
-All requests go through the **API Gateway** at `http://localhost:8000`
+All requests go through **Nginx** at `http://localhost` (port 80), which proxies to the API Gateway.
+
+> **Note**: You can still access the gateway directly at `http://localhost:8000` if needed.
 
 ### Authentication
 ```
@@ -128,7 +132,8 @@ DELETE /api/notifications/:id       - Delete notification
 
 ### Collaboration (WebSocket)
 ```
-ws://localhost:4003/:docName - Real-time editing
+ws://localhost/ws/:docName - Real-time editing (via Nginx)
+ws://localhost:4003/:docName - Direct connection (alternative)
 ```
 
 ## 🧪 Testing Workflow
@@ -200,6 +205,11 @@ CollabSpace/
 │   ├── notification-service/
 │   ├── comment-service/
 │   └── gateway-service/
+├── nginx/                           # Nginx configuration
+│   ├── nginx.conf                   # Main nginx config
+│   ├── conf.d/                      # Additional configs
+│   ├── ssl/                         # SSL certificates
+│   └── README.md                    # Nginx documentation
 ├── common/                          # Shared utilities
 ├── docker-compose.yml               # Service orchestration
 ├── collabspace_complete.postman_collection.json
@@ -222,6 +232,7 @@ npm run dev
 
 ## 📚 Documentation
 
+- **[Nginx Configuration Guide](./nginx/README.md)** - Reverse proxy setup and configuration
 - **[Postman Testing Guide](./POSTMAN_GUIDE.md)** - Complete API testing guide
 - **[Postman Collection](./collabspace_complete.postman_collection.json)** - Import into Postman
 - **[Environment Variables](./CollabSpace.postman_environment.json)** - Postman environment
@@ -247,9 +258,15 @@ docker compose up --build
 - Verify JWT token hasn't expired (7 days default)
 
 ### Connection Refused
+- Verify nginx is running: `docker compose ps nginx`
 - Verify gateway is running: `docker compose ps gateway-service`
-- Check port 8000 is not in use: `netstat -ano | findstr :8000`
+- Check port 80 is not in use: `netstat -ano | findstr :80`
 - Ensure all dependencies are healthy
+
+### Nginx Errors
+- Test nginx config: `docker compose exec nginx nginx -t`
+- Check nginx logs: `docker compose logs nginx`
+- Verify nginx health: `curl http://localhost/nginx-health`
 
 ## 🌟 Features
 
@@ -259,7 +276,8 @@ docker compose up --build
 - ✅ **Comments & Discussions** - Threaded comments with resolution
 - ✅ **Notifications** - Real-time user notifications
 - ✅ **JWT Authentication** - Secure token-based auth
-- ✅ **API Gateway** - Single entry point with routing
+- ✅ **Nginx Reverse Proxy** - Load balancing, SSL/TLS, rate limiting
+- ✅ **API Gateway** - Service routing and orchestration
 - ✅ **Event-Driven** - Kafka for async communication
 - ✅ **Caching** - Redis for performance
 - ✅ **Containerized** - Docker for easy deployment
